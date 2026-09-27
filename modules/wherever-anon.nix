@@ -510,14 +510,32 @@ in {
         requires = ["${unitNameFor account}.socket"];
         after = ["${unitNameFor account}.socket" "network.target"];
 
-        # A DELIBERATELY SMALL PATH, and note what is NOT here. The operator's
-        # unit puts git, gh, openssh AND /run/current-system/sw on the path,
-        # because it runs the operator's own commands as the operator. This one
-        # must not: `gh` exists to make AUTHENTICATED GitHub calls, and an anon
-        # session finding a working `gh` is precisely the confusion this module
-        # is built to prevent. git and bash are credential-free and genuinely
-        # needed by a session; the credentials that would make them dangerous are
-        # absent by construction (see ProtectHome below).
+        # THE BOX'S GLOBAL TOOLS ARE ON THE PATH, because PATH IS NOT A BOUNDARY.
+        # Every binary under /run/current-system/sw is in the world-readable
+        # store and ProtectSystem does not hide it, so a session could always
+        # exec it by absolute path; leaving it off PATH only made a hosted model
+        # conclude that python or node were not installed. The operator's unit
+        # carries the same entry.
+        #
+        # WHAT ACTUALLY KEEPS A TOOL SAFE HERE is the absence of CREDENTIALS and
+        # the uid, never the absence of the binary. A `gh` on the path is fine;
+        # an AUTHENTICATED one is the confusion this module exists to prevent,
+        # and it cannot happen: there is no EnvironmentFile (so no GH_TOKEN),
+        # and ProtectHome=tmpfs means the operator's ~/.config/gh, ~/.ssh and
+        # ~/.gitconfig do not exist in this unit's view (see below). Anything a
+        # session runs still egresses under this account's uid, so anonctl's
+        # rules force it exactly as they force the server.
+        #
+        # Adding the directory as a `path` entry puts ONLY
+        # /run/current-system/sw/bin (and sbin) on PATH. The unit reads no
+        # profile and no set-environment, so none of the operator-named entries
+        # that modules/anon-home.nix scrubs from the login shell appear here.
+        #
+        # /run/wrappers/bin (sudo and the other setuid wrappers) is deliberately
+        # NOT added: NoNewPrivileges makes every one of them fail anyway, and a
+        # present-but-broken sudo only invites a session to keep trying it.
+        # git, bash and coreutils stay listed explicitly so the unit does not
+        # depend on the host installing them system-wide.
         #
         # WEBHANDS IS ADDED WHEN THE ANON HOME DECLARES A BROWSER, and it used to
         # be deliberately absent: an absent tool was a better failure than a
@@ -527,7 +545,7 @@ in {
         # box-wide and the anon login shell runs, so the dashboard and
         # `anonctl use` drive one declared browser, not two.
         path =
-          [pkgs.git pkgs.bash pkgs.coreutils]
+          [pkgs.git pkgs.bash pkgs.coreutils "/run/current-system/sw"]
           ++ lib.optional anonHome.browser.enable anonHome.browser.package;
 
         environment =
