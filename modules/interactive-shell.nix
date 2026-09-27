@@ -104,6 +104,22 @@
     cmd_duration.show_notifications = false;
   });
 
+  # THE LINUX TEXT CONSOLE (TERM=linux) gets a different prompt: starship's
+  # stock `plain-text-symbols` preset (vendored verbatim beside the other one,
+  # from starship 1.26.0), with the same overrides as above that are not about
+  # glyphs. The kernel console draws from bitmap fonts of at most 512 glyphs in
+  # 16 colours, so the powerline shapes, the Nerd Font icons and the 24-bit
+  # palette cannot all be drawn there, whatever font is loaded; it showed as a
+  # row of boxes. This keeps the same information (user, host over ssh,
+  # directory, git state, duration) in ASCII and named colours. A console that
+  # can draw them (kmscon) reports another TERM and gets the full prompt.
+  starshipConsoleConfig = (pkgs.formats.toml {}).generate "starship-console.toml" (lib.recursiveUpdate
+    (builtins.fromTOML (builtins.readFile ./starship-plain-text-symbols.toml))
+    {
+      nodejs.disabled = true;
+      cmd_duration.show_notifications = false;
+    });
+
   lsColors = pkgs.runCommand "ls-colors-catppuccin-mocha" {} ''
     ${lib.getExe pkgs.vivid} generate catppuccin-mocha > $out
   '';
@@ -228,6 +244,7 @@ in {
     ];
 
     environment.etc."starship.toml".source = starshipConfig;
+    environment.etc."starship-console.toml".source = starshipConsoleConfig;
 
     programs.bash.interactiveShellInit = lib.mkMerge [
       (lib.mkBefore ''
@@ -256,17 +273,18 @@ in {
           LS_COLORS=$(<${lsColors}); export LS_COLORS
           [[ ''${BLE_VERSION-} ]] && bleopt filename_ls_colors="$LS_COLORS"
           export FZF_DEFAULT_OPTS=''${FZF_DEFAULT_OPTS-"--color=${fzfColors}"}
-          export STARSHIP_CONFIG=''${STARSHIP_CONFIG-/etc/starship.toml}
+          if [[ $TERM == linux ]]; then
+            export STARSHIP_CONFIG=''${STARSHIP_CONFIG-/etc/starship-console.toml}
+          else
+            export STARSHIP_CONFIG=''${STARSHIP_CONFIG-/etc/starship.toml}
+          fi
           # Empty (not unset) FZF_CTRL_R_COMMAND makes fzf skip its Ctrl-R binding.
           FZF_CTRL_R_COMMAND=
           eval "$(${lib.getExe pkgs.fzf} --bash)"
           unset FZF_CTRL_R_COMMAND
           eval "$(${lib.getExe pkgs.zoxide} init bash)"
           eval "$(${lib.getExe pkgs.atuin} init bash --disable-up-arrow --disable-ai)"
-          # WASISABI: not on the Linux text console, whose font has none of the
-          # powerline shapes or Nerd Font icons, so the prompt drew as boxes
-          # (seen on the live ISO's VT). Plain bash's prompt there instead.
-          [[ $TERM != linux ]] && eval "$(${lib.getExe pkgs.starship} init bash)"
+          eval "$(${lib.getExe pkgs.starship} init bash)"
           [[ ''${BLE_VERSION-} ]] && ble-attach
         fi
       '')
