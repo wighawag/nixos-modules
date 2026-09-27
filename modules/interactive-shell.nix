@@ -34,7 +34,8 @@
 #   mkBefore (before bash.nix's own block):  1. ble.sh --noattach
 #   mkAfter  (after everything else, including environment.interactiveShellInit):
 #                                            2. fzf  3. zoxide  4. atuin
-#                                            5. starship  6. ble-attach
+#                                            5. starship  (in ghostty: its shell
+#                                            integration)  6. ble-attach
 #
 # fzf is also told NOT to bind Ctrl-R at all (FZF_CTRL_R_COMMAND set but empty,
 # the switch fzf's own bash integration reads). The ordering alone did hand
@@ -266,7 +267,7 @@ in {
         fi
       '')
       (lib.mkAfter ''
-        # interactive-shell: 2. fzf  3. zoxide  4. atuin (owns Ctrl-R)  5. starship  6. ble-attach
+        # interactive-shell: 2. fzf  3. zoxide  4. atuin (owns Ctrl-R)  5. starship  (ghostty's integration)  6. ble-attach
         if [[ -n ''${__interactive_shell-} ]]; then
           unset __interactive_shell
           # Colours (see COLOURS above). LS_COLORS replaces NixOS's dircolors.
@@ -285,6 +286,20 @@ in {
           eval "$(${lib.getExe pkgs.zoxide} init bash)"
           eval "$(${lib.getExe pkgs.atuin} init bash --disable-up-arrow --disable-ai)"
           eval "$(${lib.getExe pkgs.starship} init bash)"
+          # GHOSTTY'S SHELL INTEGRATION, LOADED HERE rather than injected. Its
+          # automatic injection sources this file from inside its own startup
+          # and installs its prompt hooks AFTER, and ble.sh, seeing the
+          # injection, defers attaching to the first prompt: bash then draws
+          # the first prompt itself and ble.sh draws it again below, so every
+          # new ghostty window opened on a doubled prompt. Sourced before
+          # ble-attach it is just another prompt hook and ble.sh attaches
+          # normally. Needs `shell-integration = none` in ghostty's config
+          # (which still exports the resources dir and the feature list); an
+          # injected startup is left to ghostty, so this never loads twice.
+          if [[ $TERM == xterm-ghostty && -n ''${GHOSTTY_RESOURCES_DIR-} && -z ''${__ghostty_bash_flags+x} ]] &&
+             [[ -r $GHOSTTY_RESOURCES_DIR/shell-integration/bash/ghostty.bash ]]; then
+            builtin source "$GHOSTTY_RESOURCES_DIR/shell-integration/bash/ghostty.bash"
+          fi
           [[ ''${BLE_VERSION-} ]] && ble-attach
         fi
       '')

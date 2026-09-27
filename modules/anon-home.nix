@@ -557,13 +557,16 @@
       "L+ ${agentDir}/settings.json - - - - ${config.environment.etc."anon-home/settings.json".source}"
       "L+ ${agentDir}/AGENTS.md - - - - ${cfg.agentsFile}"
     ]
-    # webveil.json at the HOME ROOT, not under .pi: it is read by the webveil
-    # CLI as well as by the pi extension, and webveil resolves it by walking UP
-    # from the session's cwd. The home root is the highest point that walk can
-    # reach while still being this account's own, so it is the one placement
-    # that works from the home and from any directory beneath it.
+    # webveil's GLOBAL config, ~/.config/webveil/config.json, not under .pi:
+    # it is read by the webveil CLI as well as by the pi extension. Global
+    # rather than a webveil.json at the home root (where it used to be): that
+    # one is only found by walking UP from the cwd, so it reached nothing
+    # outside the home, and it sat in plain sight in the home's listing. A
+    # project's own webveil.json still overrides it.
     ++ lib.optionals cfg.webTools.enable [
-      "L+ ${home}/webveil.json - - - - ${config.environment.etc."anon-home/webveil-${account}.json".source}"
+      "d ${home}/.config 0700 ${account} ${g} -"
+      "d ${home}/.config/webveil 0700 ${account} ${g} -"
+      "L+ ${home}/.config/webveil/config.json - - - - ${config.environment.etc."anon-home/webveil-${account}.json".source}"
     ]
     ++ lib.optionals cfg.loginEnv [
       "L+ ${home}/.bash_profile - - - - ${config.environment.etc."anon-home/bash_profile".source}"
@@ -1162,6 +1165,14 @@ in {
       cfg.accounts));
 
     systemd.tmpfiles.rules = lib.concatMap rulesFor cfg.accounts;
+
+    # webveil's config used to be linked at ~/webveil.json (see rulesFor).
+    # Remove that link, and ONLY a link of ours (into the store).
+    system.activationScripts.nixos-modules-anon-home-webveil-legacy = lib.concatMapStrings (account: ''
+      if [ -L /home/${account}/webveil.json ] && [[ "$(readlink /home/${account}/webveil.json)" == /nix/store/* ]]; then
+        rm -f /home/${account}/webveil.json
+      fi
+    '') cfg.accounts;
 
     assertions =
       [

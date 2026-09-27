@@ -96,10 +96,12 @@ in
       type = lib.types.attrs;
       default = { };
       description = ''
-        ~/webveil.json, which pi-webveil (and the webveil CLI) read to find the
-        search backend. DECLARED (a read-only symlink): its content is derived
-        from the search service's own options, and a stale backend address
-        fails SILENTLY (webveil reports no results, not an error).
+        ~/.config/webveil/config.json, webveil's global config, which pi-webveil
+        and the webveil CLI both read to find the search backend (from any
+        directory, and hidden; a project's own webveil.json still overrides
+        it). DECLARED (a read-only symlink): its content is derived from the
+        search service's own options, and a stale backend address fails
+        SILENTLY (webveil reports no results, not an error).
       '';
     };
   };
@@ -153,8 +155,21 @@ in
     ++ lib.optionals (cfg.agentsFile != null) [
       "L+ ${agentDir}/AGENTS.md - - - - ${cfg.agentsFile}"
     ]
+    # `-` modes: an existing ~/.config keeps its own. Declared so that tmpfiles
+    # does not create the parents itself, root-owned, on a fresh home.
     ++ lib.optionals (cfg.webveilConfig != { }) [
-      "L+ ${home}/webveil.json - - - - ${config.environment.etc."wasisabi/pi-seed/webveil.json".source}"
+      "d ${home}/.config - ${cfg.user} users -"
+      "d ${home}/.config/webveil - ${cfg.user} users -"
+      "L+ ${home}/.config/webveil/config.json - - - - ${config.environment.etc."wasisabi/pi-seed/webveil.json".source}"
     ];
+
+    # It used to be linked at ~/webveil.json, in plain sight in the home. Remove
+    # that link, and ONLY a link of ours (into the store): a webveil.json the
+    # owner wrote there is theirs.
+    system.activationScripts.nixos-modules-pi-user-webveil-legacy = ''
+      if [ -L ${home}/webveil.json ] && [[ "$(readlink ${home}/webveil.json)" == /nix/store/* ]]; then
+        rm -f ${home}/webveil.json
+      fi
+    '';
   };
 }
