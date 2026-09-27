@@ -1,0 +1,12 @@
+{
+  "name": "pi-wasisabi-local",
+  "version": "0.1.0",
+  "description": "Registers the machine's local model server with pi and reaches it over its unix socket",
+  "type": "module",
+  "license": "AGPL-3.0-only",
+  "pi": {
+    "extensions": [
+      "./index.js"
+    ]
+  }
+}
