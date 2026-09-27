@@ -16,6 +16,7 @@
     ./anon-accounts.nix
     ./anonctl-units.nix
     ./anon-dns.nix
+    ./anon-nix-daemon.nix
     ./anon-home.nix
     ./anon-search.nix
     ./wherever-anon.nix

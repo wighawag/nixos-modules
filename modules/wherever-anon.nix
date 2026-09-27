@@ -683,6 +683,44 @@ in {
           ProtectHome = "tmpfs";
           BindPaths = ["/home/${account}"];
 
+          # THE DAEMON SOCKETS THAT WOULD ACT FOR THIS UID OUTSIDE ITS JAIL.
+          # anonctl forces egress by `meta skuid`, the socket's OWNER, so any
+          # root-side daemon this process can ask to open a connection does it
+          # in the clear, from the operator's address, with `anonctl verify`
+          # still green (the nsncd leak modules/anon-dns.nix fixes was the
+          # first of these). Each of these sockets is mode 0666, so the uid
+          # alone cannot be refused; this unit's view of the filesystem can:
+          #   - nix-daemon: substitutes and builds fixed-output derivations as
+          #     root, i.e. fetches any URL a session names. Also refused
+          #     box-wide by modules/anon-nix-daemon.nix; hidden here as well so
+          #     a session gets a clean "no daemon" rather than a permission
+          #     error it might try to work around.
+          #   - systemd-resolved's varlink sockets and the D-Bus system bus
+          #     (resolve1): `resolvectl query` resolves any name in resolved's
+          #     process. anon-dns removed the NSS route to it, not the direct
+          #     one. The system bus also reaches timesyncd, networkd and the
+          #     rest; nothing a session does needs it (Chromium only logs that
+          #     it is absent).
+          #   - tailscaled: its LocalAPI is open to every uid.
+          #   - cups and avahi: LAN-only, but still the operator's LAN.
+          # NONE OF THE SOCKETS THIS UNIT USES is under these paths: its own
+          # listener arrives as fd 3, webhands serves in the account's home,
+          # search is /run/anon-search/<account>, DNS is the loopback stub over
+          # UDP (forced by anonctl), and the journal is inherited stdout.
+          # The `-` prefix tolerates a box that does not run one of these.
+          #
+          # PER UNIT, NOT PER UID: a login shell from `anonctl use` does not run
+          # in this unit and still sees all of them except the nix daemon.
+          InaccessiblePaths = [
+            "-/nix/var/nix/daemon-socket"
+            "-/run/systemd/resolve/io.systemd.Resolve"
+            "-/run/systemd/resolve/io.systemd.Resolve.Monitor"
+            "-/run/dbus/system_bus_socket"
+            "-/run/tailscale"
+            "-/run/cups"
+            "-/run/avahi-daemon"
+          ];
+
           # Sandboxing, kept to what CANNOT interfere with the uid identity or
           # the route to the shim (see the three forbidden knobs above).
           NoNewPrivileges = true;
