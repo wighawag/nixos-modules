@@ -27,8 +27,8 @@
 #     (`users` by default, the operator's group), so the operator's own
 #     `tailscale` keeps working and the anon accounts, which have DEDICATED
 #     groups (modules/anon-accounts.nix), cannot traverse to the socket. The
-#     group is set BEFORE tailscaled starts, so the socket never exists in a
-#     reachable directory.
+#     group is set AFTER tailscaled is up, and the order is FAIL-CLOSED: until
+#     then the directory is 0750 root:root, reachable by root alone.
 #   - resolved's varlink sockets: chmod 0600 right after resolved starts. Root
 #     still connects; nothing else legitimately does once NSS no longer routes
 #     through resolved (asserted below). resolved creates the sockets itself, so
@@ -161,9 +161,15 @@ in {
     (lib.mkIf cfg.tailscale.enable {
       systemd.services.tailscaled.serviceConfig = {
         RuntimeDirectoryMode = lib.mkForce "0750";
-        # RuntimeDirectory is created before ExecStartPre runs, so the group is
-        # in place before tailscaled creates its socket.
-        ExecStartPre = ["+${pkgs.coreutils}/bin/chgrp ${cfg.tailscale.group} /run/tailscale"];
+        # ExecStartPost, NOT ExecStartPre, and this was measured, not guessed:
+        # systemd re-applies the RuntimeDirectory's ownership (the service's
+        # own root:root) when it spawns the MAIN process, so a chgrp in
+        # ExecStartPre ran, succeeded, and was silently undone a moment later
+        # (telemaque 2026-09-27: the directory was 0750 root:root, and the
+        # operator had lost `tailscale status`). The mode survives that reset;
+        # only the group does not. Post runs once tailscaled is ready, and
+        # nothing after it touches the directory.
+        ExecStartPost = ["+${pkgs.coreutils}/bin/chgrp ${cfg.tailscale.group} /run/tailscale"];
       };
       assertions = [
         {
