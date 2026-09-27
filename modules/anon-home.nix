@@ -233,10 +233,9 @@
   # way this module could fail, and the generic guard cannot see it. So compare
   # the CONTENT against the operator's declared policy file and refuse an exact
   # match.
-  operatorAgentsFile = config.nixos-modules.piUser.agentsFile or null;
+  operatorAgentsFile = cfg.operatorAgentsFile;
   agentsFileIsOperators =
-    (config.nixos-modules.piUser.enable or false)
-    && operatorAgentsFile != null
+    operatorAgentsFile != null
     && builtins.readFile cfg.agentsFile == builtins.readFile operatorAgentsFile;
 
   # models.json, BUILT here. The provider record carries baseUrl, api, apiKey
@@ -805,6 +804,21 @@ in {
         declared default first in both rendered files, so this option decides the
         startup model however `models` happens to be ordered, and a reordering
         of that list cannot silently change which model a session opens on.
+      '';
+    };
+
+    operatorAgentsFile = lib.mkOption {
+      type = lib.types.nullOr lib.types.path;
+      default =
+        if config.nixos-modules.piUser.enable
+        then config.nixos-modules.piUser.agentsFile
+        else null;
+      defaultText = lib.literalExpression "config.nixos-modules.piUser.agentsFile, when piUser is enabled";
+      description = ''
+        The OWNER's AGENTS.md, which `agentsFile` is refused for being: that
+        file describes its owner, and linking it into an anon home would put
+        that identity in every anon session's context. Set it when the owner's
+        pi is configured by something other than nixos-modules.piUser.
       '';
     };
 

@@ -107,7 +107,7 @@
   # is ever added it inherits this interpreter"). These units are NOT under the
   # Emperor, so they cannot inherit it and must derive it the same way instead:
   # one derivation's python by construction, not two settings to keep in sync.
-  uwsgiPackage = pkgs.uwsgi.override {
+  uwsgiPackage = cfg.uwsgi.override {
     plugins = ["python3"];
     python3 = cfg.package.pythonModule;
   };
@@ -219,10 +219,10 @@
         disabled = false;
       })
       cfg.engines
-      # The browser's recipes, one engine each (see `browser` below). Appended
-      # rather than listed in keep_only: SearXNG applies keep_only to its OWN
-      # engine list and then appends every user engine it does not know.
-;
+      # Engines this module does not ship (see `extraEngines`). Appended rather
+      # than listed in keep_only: SearXNG applies keep_only to its OWN engine
+      # list and then appends every user engine it does not know.
+      ++ cfg.extraEngines;
   };
 
   # ONE uWSGI config for every account, for the same reason the settings file is
@@ -385,6 +385,35 @@ in {
         Not shorter than this without thought: retrying a genuinely blocked
         engine spends the exit's budget and makes the problem worse for everyone
         sharing it, including this account's next query.
+      '';
+    };
+
+    uwsgi = lib.mkOption {
+      type = lib.types.package;
+      default = pkgs.uwsgi;
+      defaultText = lib.literalExpression "pkgs.uwsgi";
+      description = ''
+        The uWSGI these instances run, BEFORE it is rebuilt against `package`'s
+        own interpreter (which this module always does, so the two cannot
+        disagree). Set it alongside `package` when that comes from another
+        nixpkgs, to take uWSGI from the same one.
+      '';
+    };
+
+    extraEngines = lib.mkOption {
+      type = lib.types.listOf lib.types.attrs;
+      default = [ ];
+      example = lib.literalExpression ''
+        [ { name = "my-engine"; engine = "''${myEngines}/my_engine.py"; shortcut = "me"; } ]
+      '';
+      description = ''
+        Additional SearXNG engine definitions, rendered verbatim into every
+        instance's settings after the keyless engines in `engines`: engines
+        this module does not ship (your own engine files, a local service).
+
+        They run inside each account's SearXNG, so their traffic is forced
+        through that account's Tor circuit like everything else. Keep them
+        keyless for the same reason `engines` must be: a key is an account.
       '';
     };
 

@@ -62,7 +62,8 @@
   # "reconcile names no account and no colorway" and "it reads the same routes
   # directory the dispatcher imports" become evaluated claims rather than
   # intentions.
-  args = lib.escapeShellArgs [
+  args = lib.escapeShellArgs (
+  [
     "--ledger-dir"
     rcfg.ledgerDir
     "--marker-dir"
@@ -79,10 +80,18 @@
     cfg.palettePath
     "--domain"
     rcfg.domain
+  ]
+  # Only when they differ from the script's own defaults (https, no port), so a
+  # setup that needs neither gets exactly the argv it always had.
+  ++ lib.optionals (rcfg.linkScheme != "https") [
     "--link-scheme"
-    "http"
+    rcfg.linkScheme
+  ]
+  ++ lib.optionals (rcfg.linkPort != null) [
     "--link-port"
-    (toString proxy.port)
+    (toString rcfg.linkPort)
+  ]
+  ++ [
     # THE FORCED GATE, as a store path rather than a PATH lookup: the binary that
     # decides whether an account is jailed is then the same build this host
     # declares and deploys, covered by a rebuild and a rollback like everything
@@ -91,7 +100,7 @@
     # fail-closed rather than silently permissive.
     "--anonctl"
     (lib.getExe rcfg.anonctlPackage)
-  ];
+  ]);
   # NOTE what is NOT passed: the caddy BINARY and the caddy CONFIG. Both are read
   # off the running caddy unit's own ExecStart at runtime, which is stronger than
   # anything this module could declare: the validator is then by construction the
@@ -210,6 +219,37 @@ in {
       '';
     };
 
+    externalDispatcher = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = ''
+        Set when the routing fragments are imported by a Caddy site configured
+        OUTSIDE this repository (for example a wildcard site on a real domain,
+        reachable from other devices), instead of by
+        `nixos-modules.anonDispatcher`, the loopback-only one here. Then set
+        `routesDir`, `domain`, `linkScheme` and `linkPort` to match that site.
+        Without this or the local dispatcher, reconcile would write fragments
+        nothing imports.
+      '';
+    };
+
+    linkScheme = lib.mkOption {
+      type = lib.types.enum [
+        "http"
+        "https"
+      ];
+      default = if proxy.enable then "http" else "https";
+      defaultText = lib.literalExpression ''if config.nixos-modules.anonDispatcher.enable then "http" else "https"'';
+      description = "Scheme of the links `anon-reconcile links` prints.";
+    };
+
+    linkPort = lib.mkOption {
+      type = lib.types.nullOr lib.types.port;
+      default = if proxy.enable then proxy.port else null;
+      defaultText = lib.literalExpression "config.nixos-modules.anonDispatcher.port when it is enabled, else null";
+      description = "Port of the links `anon-reconcile links` prints; null means the scheme's own.";
+    };
+
     domain = lib.mkOption {
       type = lib.types.str;
       default = proxy.domain;
@@ -225,7 +265,7 @@ in {
   config = lib.mkIf (cfg.enable && rcfg.enable) {
     assertions = [
       {
-        assertion = proxy.enable;
+        assertion = proxy.enable || rcfg.externalDispatcher;
         message = ''
           nixos-modules.whereverAnon.reconcile.enable is on but the anon dispatcher is
           not (nixos-modules.anonDispatcher.enable). Reconcile would write

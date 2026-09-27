@@ -753,11 +753,12 @@ reconcile_pass() {
   # This is the same distinction the validator makes one function away, where a
   # missing tool must never look like a broken config.
   if [ ! -d "$LEDGER_DIR" ]; then
-    # PROVISIONED state is a state.json reconcile wrote, not a directory: the
-    # wherever-anon module's tmpfiles rules create an empty <account>/ for
-    # every DECLARED slot at boot, so on a machine anonctl has never run on
-    # (every fresh install) a directory test refused every boot. (wasisabi fix;
-    # the my-boxes original has the same latent failure on a rebirth.)
+    # PROVISIONED state is a state.json this script wrote, NOT a directory:
+    # the wherever-anon module's tmpfiles rules create an empty <account>/ for
+    # every DECLARED slot at boot, so a directory test refused on every boot of
+    # any host anonctl has never run on (every fresh install, or a rebirth).
+    # Measured on a fresh wasisabi demo VM, 2026-09-26; pinned by the my-boxes
+    # fixture's "fresh host" scenario.
     if [ -n "$(find "$STATE_DIR" -mindepth 2 -maxdepth 2 -name state.json -print -quit 2>/dev/null)" ]; then
       REFUSED=1
       warn "anonctl's ledger directory $LEDGER_DIR DOES NOT EXIST, while provisioned state does. Nothing can be concluded about which accounts were removed, so teardown and the orphan sweep are SKIPPED rather than deleting handles and tokens that cannot be recovered. Install/repair anonctl, or remove the state deliberately."
