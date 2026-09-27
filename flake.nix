@@ -67,6 +67,7 @@
           ./modules/anonctl-units.nix
           ./modules/anon-dns.nix
           ./modules/anon-nix-daemon.nix
+          ./modules/anon-host-sockets.nix
           ./modules/anon-home.nix
           ./modules/anon-search.nix
           ./modules/wherever-anon.nix
