@@ -7,7 +7,7 @@
 # Same story as webhands: the published tarball ships a PREBUILT dist/ and NO
 # lockfile, so buildNpmPackage has nothing to build its dependency cache
 # from. The lock beside this file is generated once from the tarball itself
-# (webveil@0.4.0 as the ROOT package, not as a dependency of a wrapper
+# (webveil@<version> as the ROOT package, not as a dependency of a wrapper
 # project) and committed, which is what pins the floating ranges (^7.28.0
 # undici &c) into a reproducible closure.
 #
@@ -35,7 +35,7 @@
   pkgs,
   # Explicit, never a dist-tag: an upstream publish must not change what a
   # rebuild produces.
-  version ? "0.4.0",
+  version ? "0.14.2",
 }:
 pkgs.buildNpmPackage {
   pname = "webveil";
@@ -43,7 +43,7 @@ pkgs.buildNpmPackage {
 
   src = pkgs.fetchurl {
     url = "https://registry.npmjs.org/webveil/-/webveil-${version}.tgz";
-    hash = "sha256-MzcJXgpiEyr/o8NWuHdG1MA5VcpDkQ70KR2YuG1xKL0=";
+    hash = "sha256-rJ1O9C+NQB39YvVsX03j9ZNUA7eiPVD74dppMeAnZcM=";
   };
 
   # The lockfile the tarball does not ship. In postPatch because that is the
@@ -53,7 +53,7 @@ pkgs.buildNpmPackage {
     cp ${./webveil-package-lock.json} package-lock.json
   '';
 
-  npmDepsHash = "sha256-L4ULNWz5T9u3qKPrr6MRkQ3QHfF9wpSDDAUnQkR88PQ=";
+  npmDepsHash = "sha256-6O8k9SQhjXBAUMv/vHGAJ53fE8oJ8G7e+8wM6qyaPBs=";
 
   npmFlags = ["--ignore-scripts"];
 
