@@ -757,7 +757,7 @@ reconcile_pass() {
     # the wherever-anon module's tmpfiles rules create an empty <account>/ for
     # every DECLARED slot at boot, so a directory test refused on every boot of
     # any host anonctl has never run on (every fresh install, or a rebirth).
-    # Measured on a fresh wasisabi demo VM, 2026-09-26; pinned by the my-boxes
+    # Measured on a fresh wabisabi demo VM, 2026-09-26; pinned by the my-boxes
     # fixture's "fresh host" scenario.
     if [ -n "$(find "$STATE_DIR" -mindepth 2 -maxdepth 2 -name state.json -print -quit 2>/dev/null)" ]; then
       REFUSED=1

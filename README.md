@@ -2,7 +2,7 @@
 
 NixOS modules and packages for machines that run AI agents: a local model, private search, the pi coding agent and its web UI, anonymous accounts whose every packet is forced through Tor, and an interactive bash. Each module is inert until its own `enable` is set.
 
-Used by [wasisabi](https://github.com/wighawag/wasisabi), which switches them on with sensible defaults for a desktop machine, and by the my-boxes fleet. Most of them were first built for, and run on, real machines in that fleet; their comments keep that history.
+Used by [wabisabi](https://github.com/wighawag/wabisabi), which switches them on with sensible defaults for a desktop machine, and by the my-boxes fleet. Most of them were first built for, and run on, real machines in that fleet; their comments keep that history.
 
 ## Modules
 
@@ -16,7 +16,7 @@ Used by [wasisabi](https://github.com/wighawag/wasisabi), which switches them on
 | `interactiveShell` | `nixos-modules.interactiveShell` | ble.sh, fzf, zoxide, atuin and a starship powerline prompt in /etc/bashrc, one Catppuccin palette |
 | `default` | all of the above | |
 
-The packages they run (`anonctl`, `pi`, `wherever`, `webveil`, `pi-webveil`, `memonaut`, `memonaut-pi`, `webhands`, `pi-wasisabi-local`, ...) are built against the importing system's pkgs and exposed as `config.nixos-modules.pkgs`; override one attribute to substitute your own build. They are also flake `packages` for building on their own.
+The packages they run (`anonctl`, `pi`, `wherever`, `webveil`, `pi-webveil`, `memonaut`, `memonaut-pi`, `webhands`, `pi-wabisabi-local`, ...) are built against the importing system's pkgs and exposed as `config.nixos-modules.pkgs`; override one attribute to substitute your own build. They are also flake `packages` for building on their own.
 
 ## Using it
 
@@ -29,7 +29,7 @@ inputs.nixos-modules = {
 modules = [ nixos-modules.nixosModules.default ];
 ```
 
-then enable what you want, e.g. `nixos-modules.llm.enable = true;`. See wasisabi's `modules/agents.nix` for how the pieces are wired together, and its `notes/agents.md` for the design and what has been verified.
+then enable what you want, e.g. `nixos-modules.llm.enable = true;`. See wabisabi's `modules/agents.nix` for how the pieces are wired together, and its `notes/agents.md` for the design and what has been verified.
 
 ## License
 

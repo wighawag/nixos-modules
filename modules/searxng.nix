@@ -41,13 +41,13 @@ let
   # YAML generator needs remarshal, i.e. a Python toolchain the medium does not
   # carry: an offline install once set out to rebuild 1042 derivations for it.
   # writeText needs nothing but the builder that every system already has.
-  settingsFile = pkgs.writeText "wasisabi-searxng-settings.yml" (
+  settingsFile = pkgs.writeText "wabisabi-searxng-settings.yml" (
     builtins.toJSON (
     lib.recursiveUpdate {
       use_default_settings = true;
       general = {
         debug = false;
-        instance_name = "wasisabi-search";
+        instance_name = "wabisabi-search";
         contact_url = false;
       };
       search.formats = [
@@ -74,7 +74,7 @@ let
     )
   );
 
-  uwsgiJson = pkgs.writeText "wasisabi-searxng-uwsgi.json" (
+  uwsgiJson = pkgs.writeText "wabisabi-searxng-uwsgi.json" (
     builtins.toJSON {
       uwsgi = {
         strict = true;
@@ -99,7 +99,7 @@ let
     }
   );
 
-  startScript = pkgs.writeShellScript "wasisabi-searxng-start" ''
+  startScript = pkgs.writeShellScript "wabisabi-searxng-start" ''
     set -euo pipefail
     SEARXNG_SECRET="$(${pkgs.coreutils}/bin/head -c 32 /dev/urandom | ${pkgs.coreutils}/bin/base64 -w0)"
     export SEARXNG_SECRET
@@ -131,7 +131,7 @@ in
     socketPath = lib.mkOption {
       type = lib.types.str;
       readOnly = true;
-      default = "/run/wasisabi-search/search.sock";
+      default = "/run/wabisabi-search/search.sock";
       description = "READ-ONLY: where the instance serves, so consumers read one value.";
     };
 
@@ -172,14 +172,14 @@ in
     users.users.searxng = {
       isSystemUser = true;
       group = "searxng";
-      description = "wasisabi local SearXNG";
+      description = "wabisabi local SearXNG";
     };
 
     systemd.tmpfiles.rules = [
-      "d /run/wasisabi-search 0750 searxng ${cfg.clientGroup} -"
+      "d /run/wabisabi-search 0750 searxng ${cfg.clientGroup} -"
     ];
 
-    systemd.sockets.wasisabi-searxng = {
+    systemd.sockets.wabisabi-searxng = {
       description = "Local SearXNG socket";
       wantedBy = [ "sockets.target" ];
       socketConfig = {
@@ -191,20 +191,20 @@ in
       };
     };
 
-    systemd.services.wasisabi-searxng = {
+    systemd.services.wabisabi-searxng = {
       description = "Local SearXNG (socket-activated)";
-      requires = [ "wasisabi-searxng.socket" ];
+      requires = [ "wabisabi-searxng.socket" ];
       after = [
-        "wasisabi-searxng.socket"
+        "wabisabi-searxng.socket"
         "network.target"
       ];
       serviceConfig = {
         User = "searxng";
         Group = "searxng";
         ExecStart = startScript;
-        StateDirectory = "wasisabi-searxng";
+        StateDirectory = "wabisabi-searxng";
         StateDirectoryMode = "0700";
-        Environment = [ "HOME=%S/wasisabi-searxng" ];
+        Environment = [ "HOME=%S/wabisabi-searxng" ];
         Restart = "on-failure";
         RestartSec = 2;
         PrivateTmp = true;

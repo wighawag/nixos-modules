@@ -1,13 +1,13 @@
-// pi-wasisabi-local: registers this machine's local model server with pi, and
+// pi-wabisabi-local: registers this machine's local model server with pi, and
 // reaches it over its UNIX SOCKET.
 //
 // Why an extension rather than a models.json entry:
 //
 //   1. pi's providers speak HTTP to a host:port. The local server listens on a
-//      unix socket (see wasisabi's modules/services/llm.nix for why), and the
+//      unix socket (see wabisabi's modules/services/llm.nix for why), and the
 //      anonctl-jailed accounts can reach nothing else without a hole punched
 //      in their jail. So the transport has to be taught, and only code can.
-//   2. The provider entry is READ from /etc/wasisabi/llm.json, which the NixOS
+//   2. The provider entry is READ from /etc/wabisabi/llm.json, which the NixOS
 //      module writes from the same values that start the server. A model swap
 //      therefore reaches pi with no file in anyone's home to update, and
 //      models.json stays the user's own file for their own providers.
@@ -26,9 +26,9 @@ import fs from "node:fs";
 import http from "node:http";
 import { Readable } from "node:stream";
 
-const CONFIG_PATH = process.env.WASISABI_LLM_CONFIG || "/etc/wasisabi/llm.json";
-const SENTINEL_ORIGIN = "http://wasisabi-llm.invalid";
-const WRAPPED = Symbol.for("wasisabi.llm.fetchWrapped");
+const CONFIG_PATH = process.env.WABISABI_LLM_CONFIG || "/etc/wabisabi/llm.json";
+const SENTINEL_ORIGIN = "http://wabisabi-llm.invalid";
+const WRAPPED = Symbol.for("wabisabi.llm.fetchWrapped");
 
 function readConfig() {
   try {
@@ -111,7 +111,7 @@ function unixFetch(socketPath, input, init = {}) {
 function installSocketFetch(socketPath) {
   if (globalThis[WRAPPED]) return;
   const inner = globalThis.fetch;
-  globalThis.fetch = function wasisabiFetch(input, init) {
+  globalThis.fetch = function wabisabiFetch(input, init) {
     const href = input instanceof Request ? input.url : String(input);
     if (href.startsWith(SENTINEL_ORIGIN + "/")) return unixFetch(socketPath, input, init);
     return inner.call(this, input, init);

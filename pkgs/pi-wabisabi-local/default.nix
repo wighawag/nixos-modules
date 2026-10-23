@@ -5,16 +5,16 @@
 # every session its local model SILENTLY. The check below fails the build
 # instead.
 { pkgs }:
-pkgs.runCommand "pi-wasisabi-local-0.1.0"
+pkgs.runCommand "pi-wabisabi-local-0.1.0"
   {
-    passthru.extensionSubdir = "lib/node_modules/pi-wasisabi-local";
+    passthru.extensionSubdir = "lib/node_modules/pi-wabisabi-local";
     meta = {
       description = "pi extension: the machine's local model, over its unix socket";
       license = pkgs.lib.licenses.agpl3Only;
     };
   }
   ''
-    root=$out/lib/node_modules/pi-wasisabi-local
+    root=$out/lib/node_modules/pi-wabisabi-local
     install -Dm444 ${./package.json} $root/package.json
     install -Dm444 ${./index.js} $root/index.js
     ${pkgs.nodejs}/bin/node --check $root/index.js

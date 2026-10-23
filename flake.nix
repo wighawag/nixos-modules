@@ -13,7 +13,7 @@
     # Pinned to the commit tagged wherever-dev@0.18.1. 0.16.0+ is required:
     # unix socket support, the only interface an anon account can serve; and
     # 0.18.1+ for sessions on a model an extension provides (the local model
-    # through pi-wasisabi-local: before it, a wherever session came up as
+    # through pi-wabisabi-local: before it, a wherever session came up as
     # `unknown:unknown` while the pi CLI worked). Its
     # server/package.json also decides which pi version the `pi` CLI is built
     # at (pkgs/default.nix).
@@ -89,7 +89,7 @@
           # Everything on at once, on a throwaway machine: every module
           # evaluates, the anon stack's cross-module assertions hold, and the
           # packages it references build. Behaviour is tested where the modules
-          # are USED (wasisabi's demo VM and its agent-layer check, my-boxes'
+          # are USED (wabisabi's demo VM and its agent-layer check, my-boxes'
           # hosts); this only proves the repo stands on its own.
           everything = nixpkgs.lib.nixosSystem {
             inherit system;

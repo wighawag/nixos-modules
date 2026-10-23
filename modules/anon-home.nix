@@ -157,8 +157,8 @@
   # second provider. It matches the operator's id, which is what makes a model
   # name mean the same thing in both places.
   #
-  # WASISABI: with NO `endpoint` (the default here) there is no LAN server to
-  # name, and the provider comes from an EXTENSION instead: pi-wasisabi-local
+  # WABISABI: with NO `endpoint` (the default here) there is no LAN server to
+  # name, and the provider comes from an EXTENSION instead: pi-wabisabi-local
   # registers the machine's own model under `provider`, reaching it over the
   # unix socket (no jail exemption needed). models.json then carries no
   # provider at all, and `provider` is what enabledModels is written against.
@@ -374,7 +374,7 @@
         b = lib.elemAt endpointNums 1;
       in
         a == 10 || (a == 192 && b == 168) || (a == 172 && b >= 16 && b <= 31)
-        # WASISABI: loopback too. A model on the SAME machine reached by a
+        # WABISABI: loopback too. A model on the SAME machine reached by a
         # loopback exemption (`anonctl --allow 127.0.0.1:<port>`, which anonctl
         # accepts under its stricter loopback guardrail, its ADR-0008) is the
         # fallback when the socket route is not used.
@@ -629,8 +629,8 @@ in {
       type = lib.types.str;
       default = "local";
       description = ''
-        WASISABI: the provider id the sessions use when `endpoint` is null, i.e.
-        the name an EXTENSION registers the model under (pi-wasisabi-local
+        WABISABI: the provider id the sessions use when `endpoint` is null, i.e.
+        the name an EXTENSION registers the model under (pi-wabisabi-local
         registers the machine's own model server as "local"). Ignored when
         `endpoint` is set, which renders its own provider into models.json.
       '';

@@ -1,4 +1,4 @@
-# The packages wasisabi's agent layer runs, built against WHICHEVER nixpkgs
+# The packages wabisabi's agent layer runs, built against WHICHEVER nixpkgs
 # imports the modules (never this repo's own pin), exactly like every other
 # package the module layers reference.
 #
@@ -43,6 +43,6 @@ in
   pi-webveil = import ./pi-webveil.nix { inherit pkgs; };
   memonaut = import ./memonaut.nix { inherit pkgs; };
   memonaut-pi = import ./memonaut-pi.nix { inherit pkgs; };
-  pi-wasisabi-local = import ./pi-wasisabi-local { inherit pkgs; };
+  pi-wabisabi-local = import ./pi-wabisabi-local { inherit pkgs; };
   webhands = import ./webhands.nix { inherit pkgs; };
 }

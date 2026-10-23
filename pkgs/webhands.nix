@@ -4,7 +4,7 @@
 # Carried over from the my-boxes fleet (packages/webhands.nix there) with ONE
 # deliberate change: the browser. The fleet wraps it with Chrome for Testing,
 # Google's own build, which ships the WidevineCdm DRM module and is not free
-# software, so it cannot be on a wasisabi machine. This wraps it with nixpkgs'
+# software, so it cannot be on a wabisabi machine. This wraps it with nixpkgs'
 # `chromium` instead: built from source, BSD-3-Clause, no Widevine.
 #
 # THE VERSION DOES NOT MATCH, AND THAT WAS MEASURED RATHER THAN ASSUMED:

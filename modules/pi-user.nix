@@ -20,14 +20,14 @@
 # A store path written into it would be garbage-collected out from under it
 # after an upgrade, and pi's local-package resolution is a bare existsSync, so
 # the extension would vanish SILENTLY. So the seed never names a store path: it
-# names /etc/wasisabi/pi-extensions/<name>, a symlink every activation repoints
+# names /etc/wabisabi/pi-extensions/<name>, a symlink every activation repoints
 # at the current build. The file stays the owner's; the extensions stay current.
 let
   cfg = config.nixos-modules.piUser;
   home = config.users.users.${cfg.user}.home or "/home/${cfg.user}";
   agentDir = "${home}/.pi/agent";
 
-  extDir = "/etc/wasisabi/pi-extensions";
+  extDir = "/etc/wabisabi/pi-extensions";
   extensionPaths = lib.mapAttrsToList (name: _: "${extDir}/${name}") cfg.extensions;
 
   settingsJson = {
@@ -121,13 +121,13 @@ in
     environment.etc =
       lib.mapAttrs' (
         name: p:
-        lib.nameValuePair "wasisabi/pi-extensions/${name}" { source = "${p}/${p.extensionSubdir}"; }
+        lib.nameValuePair "wabisabi/pi-extensions/${name}" { source = "${p}/${p.extensionSubdir}"; }
       ) cfg.extensions
       // {
-        "wasisabi/pi-seed/settings.json".text = builtins.toJSON settingsJson;
+        "wabisabi/pi-seed/settings.json".text = builtins.toJSON settingsJson;
       }
       // lib.optionalAttrs (cfg.webveilConfig != { }) {
-        "wasisabi/pi-seed/webveil.json".text = builtins.toJSON cfg.webveilConfig;
+        "wabisabi/pi-seed/webveil.json".text = builtins.toJSON cfg.webveilConfig;
       };
 
     systemd.tmpfiles.rules = [
@@ -138,11 +138,11 @@ in
       (
         if cfg.declareSettings then
           "L+ ${agentDir}/settings.json - - - - ${
-            config.environment.etc."wasisabi/pi-seed/settings.json".source
+            config.environment.etc."wabisabi/pi-seed/settings.json".source
           }"
         else
           "C ${agentDir}/settings.json 0600 ${cfg.user} users - ${
-            config.environment.etc."wasisabi/pi-seed/settings.json".source
+            config.environment.etc."wabisabi/pi-seed/settings.json".source
           }"
       )
     ]
@@ -160,7 +160,7 @@ in
     ++ lib.optionals (cfg.webveilConfig != { }) [
       "d ${home}/.config - ${cfg.user} users -"
       "d ${home}/.config/webveil - ${cfg.user} users -"
-      "L+ ${home}/.config/webveil/config.json - - - - ${config.environment.etc."wasisabi/pi-seed/webveil.json".source}"
+      "L+ ${home}/.config/webveil/config.json - - - - ${config.environment.etc."wabisabi/pi-seed/webveil.json".source}"
     ];
 
     # It used to be linked at ~/webveil.json, in plain sight in the home. Remove

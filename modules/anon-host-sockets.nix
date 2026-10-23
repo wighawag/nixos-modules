@@ -20,7 +20,7 @@
 #     from the box's resolver. anon-dns removed the NSS route to resolved, not
 #     the direct one.
 #   - the D-Bus system bus: reachable, which is how resolvectl got there, and
-#     on a desktop (wasisabi) it also reaches NetworkManager and friends.
+#     on a desktop (wabisabi) it also reaches NetworkManager and friends.
 #
 # THREE LEVERS, each the narrowest that works for its daemon:
 #   - tailscaled: its runtime directory becomes 0750 and group `tailscale.group`
