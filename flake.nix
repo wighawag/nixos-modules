@@ -184,6 +184,24 @@
             && lib.hasPrefix "/nix/store/" (lib.head searchcastJson.searchcast.codeRecipes)
             && !(searchcastJson ? baseUrl)
             && !(searchcastHost.config.systemd.sockets ? "anon-search-anon");
+          # The searchcast backend with no recipes and no chain: webveil's own
+          # default chain, which it uses only when the keys are ABSENT (an empty
+          # codeRecipes list makes every search fail with "set searchcast.engines").
+          defaultChainHost = everything.extendModules {
+            modules = [
+              {
+                nixos-modules.anonSearch.enable = lib.mkForce false;
+                nixos-modules.anonHome.webTools.backend = "searchcast";
+              }
+            ];
+          };
+          defaultChainJson = builtins.fromJSON (
+            builtins.unsafeDiscardStringContext
+              defaultChainHost.config.environment.etc."anon-home/webveil-anon.json".text
+          );
+          defaultChainOk =
+            defaultChainJson.backend == "searchcast"
+            && defaultChainJson.searchcast == {state.persist = false;};
           # anonSearch with the searchcast backend is refused (its sockets would run unused).
           refusedHost = searchcastHost.extendModules {
             modules = [ { nixos-modules.anonSearch.enable = lib.mkOverride 40 true; } ];
@@ -197,6 +215,9 @@
           searchcast-backend-evaluates =
             assert searchcastOk;
             pkgs.writeText "nixos-modules-searchcast" searchcastHost.config.system.build.toplevel.drvPath;
+          searchcast-default-chain =
+            assert defaultChainOk;
+            pkgs.writeText "nixos-modules-searchcast-default-chain" "ok";
           searchcast-refuses-anon-search =
             assert refusedOk;
             pkgs.writeText "nixos-modules-searchcast-refuses" "ok";
