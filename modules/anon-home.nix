@@ -370,10 +370,16 @@
       backend = "searchcast";
       egress = {mode = "direct";};
       fetchSize = "m";
+      # Empty lists are LEFT OUT, not written as []: webveil uses its default
+      # chain only when `codeRecipes` (and `engines`, `recipes`) are ABSENT,
+      # and an empty `codeRecipes` instead makes every search fail with "set
+      # searchcast.engines". Measured in a wabisabi VM, 2026-10-24.
       searchcast =
         {
-          codeRecipes = map toString cfg.webTools.searchcast.codeRecipes;
           state.persist = false;
+        }
+        // lib.optionalAttrs (cfg.webTools.searchcast.codeRecipes != []) {
+          codeRecipes = map toString cfg.webTools.searchcast.codeRecipes;
         }
         // lib.optionalAttrs (cfg.webTools.searchcast.engines != []) {
           inherit (cfg.webTools.searchcast) engines;
@@ -756,7 +762,8 @@ in {
             (webveil refuses them from a project file). Naming any replaces
             webveil's default engine chain, so to keep its bundled Mwmbl or
             Marginalia engine, list that recipe file too. Empty: webveil's
-            default chain.
+            default chain (the key is then left out of webveil.json, which is
+            what webveil requires for that).
           '';
         };
 
