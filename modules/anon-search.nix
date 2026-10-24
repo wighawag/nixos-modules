@@ -456,6 +456,18 @@ in {
         '';
       }
       {
+        # The other way round: with the searchcast backend the accounts'
+        # webveil.json names no socket, so an instance here would be a running
+        # SearXNG nobody asks. Off, not idle, is the intent.
+        assertion = anonHome.webTools.backend == "searxng";
+        message = ''
+          nixos-modules.anonSearch.enable is on but nixos-modules.anonHome.webTools.backend
+          is "${anonHome.webTools.backend}", so no account's webveil.json names these
+          sockets and the instances would run unused. Turn anonSearch off with
+          that backend, or set the backend back to "searxng".
+        '';
+      }
+      {
         # The socket path is the CONTRACT between this module and anon-home: one
         # side serves it, the other names it in webveil.json. They read it from
         # the same read-only attrset, so this can only fire if someone adds an

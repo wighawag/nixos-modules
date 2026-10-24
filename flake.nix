@@ -155,9 +155,51 @@
               }
             ];
           };
+          # The same host on the searchcast backend: no anonSearch, and the
+          # account's webveil.json carries the code recipes, the chain and
+          # in-memory state.
+          searchcastHost = everything.extendModules {
+            modules = [
+              {
+                nixos-modules.anonSearch.enable = lib.mkForce false;
+                nixos-modules.anonHome.webTools = {
+                  backend = "searchcast";
+                  searchcast = {
+                    codeRecipes = [ (pkgs.writeText "web.mjs" "export default {};") ];
+                    engines = [ "web" ];
+                  };
+                };
+              }
+            ];
+          };
+          searchcastJson = builtins.fromJSON (
+            builtins.unsafeDiscardStringContext
+              searchcastHost.config.environment.etc."anon-home/webveil-anon.json".text
+          );
+          searchcastOk =
+            searchcastJson.backend == "searchcast"
+            && searchcastJson.egress.mode == "direct"
+            && searchcastJson.searchcast.state.persist == false
+            && searchcastJson.searchcast.engines == [ "web" ]
+            && lib.hasPrefix "/nix/store/" (lib.head searchcastJson.searchcast.codeRecipes)
+            && !(searchcastJson ? baseUrl)
+            && !(searchcastHost.config.systemd.sockets ? "anon-search-anon");
+          # anonSearch with the searchcast backend is refused (its sockets would run unused).
+          refusedHost = searchcastHost.extendModules {
+            modules = [ { nixos-modules.anonSearch.enable = lib.mkOverride 40 true; } ];
+          };
+          refusedOk = lib.any (
+            a: !a.assertion && lib.hasInfix "nixos-modules.anonHome.webTools.backend" a.message
+          ) refusedHost.config.assertions;
         in
         {
           everything-evaluates = pkgs.writeText "nixos-modules-everything" everything.config.system.build.toplevel.drvPath;
+          searchcast-backend-evaluates =
+            assert searchcastOk;
+            pkgs.writeText "nixos-modules-searchcast" searchcastHost.config.system.build.toplevel.drvPath;
+          searchcast-refuses-anon-search =
+            assert refusedOk;
+            pkgs.writeText "nixos-modules-searchcast-refuses" "ok";
           reconcile-lint = self.packages.${system}.anon-reconcile;
           routes-guard-lint = self.packages.${system}.caddy-routes-guard;
         };
