@@ -35,7 +35,7 @@
   pkgs,
   # Explicit, never a dist-tag: an upstream publish must not change what a
   # rebuild produces.
-  version ? "0.14.2",
+  version ? "0.15.0",
 }:
 pkgs.buildNpmPackage {
   pname = "webveil";
@@ -43,7 +43,7 @@ pkgs.buildNpmPackage {
 
   src = pkgs.fetchurl {
     url = "https://registry.npmjs.org/webveil/-/webveil-${version}.tgz";
-    hash = "sha256-rJ1O9C+NQB39YvVsX03j9ZNUA7eiPVD74dppMeAnZcM=";
+    hash = "sha256-bLD48BK6IdgGmNOv/UvC6Gl5wv0WIBYu+C+h7C0/Qd8=";
   };
 
   # The lockfile the tarball does not ship. In postPatch because that is the
@@ -53,7 +53,7 @@ pkgs.buildNpmPackage {
     cp ${./webveil-package-lock.json} package-lock.json
   '';
 
-  npmDepsHash = "sha256-6O8k9SQhjXBAUMv/vHGAJ53fE8oJ8G7e+8wM6qyaPBs=";
+  npmDepsHash = "sha256-HuQZcugiTd5o2fkz7AxYrIALcleH4OBKCMk+qfN2tu8=";
 
   npmFlags = ["--ignore-scripts"];
 

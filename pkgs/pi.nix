@@ -20,6 +20,18 @@
 #      is in its comment below);
 #   3. set `npmDepsHash = pkgs.lib.fakeHash;`, run `nix build .#pi-coding-agent`
 #      and paste the `got:` hash back.
+#
+# FROM Pi 1.0.0 THE TARBALL SHIPS NO SHRINKWRAP (upstream removed it: "npm
+# installations no longer pin transitive dependencies"). For those versions
+# step 2 is replaced by a lockfile generated ONCE from the tarball and
+# committed beside this file, the way webveil's is, and named by the row's
+# `lockfile`:
+#   curl -sL <tarball url> | tar xz && cd package
+#   jq 'del(.devDependencies)' package.json > p && mv p package.json
+#   npm install --package-lock-only --ignore-scripts
+#   cp package-lock.json <this dir>/pi-<v>-package-lock.json
+# The devDependencies are dropped BEFORE generating, because postPatch drops
+# them from the manifest too and `npm ci` checks manifest against lock.
 {
   pkgs,
   # The pinned Pi version. Explicit (never a dist-tag) so the module's rendered
@@ -53,8 +65,17 @@
   #           revalidation of the phone line for no reason. Couple where there
   #           is sharing; pin independently where there is not.
   #
+  #   1.4.0   the operator's Pi from wherever 0.19.0 on (the 0.80.6 row stays
+  #           until no consumer pins an older wherever). A `lockfile` row: see
+  #           the header for why 1.x needs one.
+  #
   # ADDING A ROW is the bump recipe in the header, done once per version.
   knownVersions = {
+    "1.4.0" = {
+      srcHash = "sha256-0VXBbvb6AJYPv1iykRU26AsF8zcA4LFPvQiWft4MdCg=";
+      npmDepsHash = "sha256-FzYzTlweKWBU+04Idpkzk6n/K++wHEIJfTJluTdfVbg=";
+      lockfile = ./pi-1.4.0-package-lock.json;
+    };
     "0.82.1" = {
       srcHash = "sha256-g0OrlcurV2by9dSIRN+NsT53Lq0uKXYWbLuCCinay30=";
       npmDepsHash = "sha256-pTI6uXLZj+NZwjn0sI11cm/gKPMDYZGGbbivGEjyBiI=";
@@ -113,8 +134,14 @@ in
     # relaxing it. Re-fetch on every version bump:
     #   curl -sS https://registry.npmjs.org/@earendil-works%2F<pkg> \
     #     | jq -r '.versions["<version>"].dist.integrity'
+    #
+    # A `lockfile` row (Pi >= 1.0.0, no shrinkwrap) skips (1): the committed
+    # lock already carries every integrity, so it is copied in instead.
     postPatch = let
-      siblings = pinned.siblings;
+      siblings = pinned.siblings or {};
+      copyLockfile = pkgs.lib.optionalString (pinned ? lockfile) ''
+        cp ${pinned.lockfile} package-lock.json
+      '';
       # JSON is whitespace-insensitive, so the missing key is appended to the
       # `resolved` line it belongs to rather than reindented into the object.
       addIntegrity = name: integrity: let
@@ -139,7 +166,8 @@ in
         mv package.json.pruned package.json
       '';
     in
-      pkgs.lib.concatStrings (pkgs.lib.mapAttrsToList addIntegrity siblings)
+      copyLockfile
+      + pkgs.lib.concatStrings (pkgs.lib.mapAttrsToList addIntegrity siblings)
       + dropDevDependencies;
 
     # The hash of Pi's shrinkwrapped dependency cache. One per version, recorded

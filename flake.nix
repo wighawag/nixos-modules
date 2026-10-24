@@ -10,7 +10,9 @@
     # The wherever server (a web UI driving pi agent sessions), as SOURCE: its
     # `package.nix` is a plain function of pkgs, so it builds against the
     # consumer's nixpkgs instead of dragging its own pin into every closure.
-    # Pinned to the commit tagged wherever-dev@0.18.1. 0.16.0+ is required:
+    # Pinned to the commit tagged wherever-dev@0.19.1, which embeds pi 1.4.0
+    # (so the `pi` CLI moves to 1.4.0 with it) and gives web sessions pi's
+    # native MCP support. 0.16.0+ is required:
     # unix socket support, the only interface an anon account can serve; and
     # 0.18.1+ for sessions on a model an extension provides (the local model
     # through pi-wabisabi-local: before it, a wherever session came up as
@@ -18,7 +20,7 @@
     # server/package.json also decides which pi version the `pi` CLI is built
     # at (pkgs/default.nix).
     wherever = {
-      url = "github:wighawag/wherever/14f259641f44630b72430035cac1c275b2901ae4";
+      url = "github:wighawag/wherever/861a99bd93731e395bb18962aeede3ec12239524";
       flake = false;
     };
   };
