@@ -348,12 +348,37 @@
   #
   # `fetchEgress` is deliberately UNSET so it inherits `egress`: the `web_fetch`
   # hop is forced by the same kernel rules as every other packet this uid sends.
-  webveilJsonFor = account: {
-    backend = "searxng";
-    baseUrl = "unix:${cfg.webTools.searchSocketPaths.${account}}";
-    egress = {mode = "direct";};
-    fetchSize = "m";
-  };
+  #
+  # THE BACKEND IS A CHOICE (webTools.backend). `searxng` names this account's
+  # own SearXNG socket (modules/anon-search.nix). `searchcast` runs the engines
+  # in-process from the code recipes the host names; the same kernel forcing
+  # puts every engine request through the account's Tor circuit, so `direct`
+  # stays right for it too, and there is no local backend hop to guard. Its
+  # engine state is kept IN MEMORY (`state.persist = false`): written to disk,
+  # an engine's session cookie would tie one account's searches together across
+  # sessions. The cost is that a challenge recipe solves its challenge again in
+  # each new session.
+  webveilJsonFor = account:
+    if cfg.webTools.backend == "searxng"
+    then {
+      backend = "searxng";
+      baseUrl = "unix:${cfg.webTools.searchSocketPaths.${account}}";
+      egress = {mode = "direct";};
+      fetchSize = "m";
+    }
+    else {
+      backend = "searchcast";
+      egress = {mode = "direct";};
+      fetchSize = "m";
+      searchcast =
+        {
+          codeRecipes = map toString cfg.webTools.searchcast.codeRecipes;
+          state.persist = false;
+        }
+        // lib.optionalAttrs (cfg.webTools.searchcast.engines != []) {
+          inherit (cfg.webTools.searchcast) engines;
+        };
+    };
 
   # PRIVATE-RANGE IP:port only. See the `endpoint` option and the assertion for
   # why the grammar check is not merely "looks like an address".
@@ -701,6 +726,48 @@ in {
           web tools with no warning, no error and exit 0. An assertion below
           rejects a package that does not publish that passthru.
         '';
+      };
+
+      backend = lib.mkOption {
+        type = lib.types.enum ["searxng" "searchcast"];
+        default = "searxng";
+        description = ''
+          What each account's `web_search` asks. `searxng`: that account's own
+          SearXNG over a unix socket (modules/anon-search.nix serves it, so
+          enable nixos-modules.anonSearch with it). `searchcast`: webveil's
+          in-process engine chain, run from `searchcast.codeRecipes`, with no
+          service at all (nixos-modules.anonSearch must then be OFF; it is
+          refused, since nothing would read its sockets).
+
+          Either way the account's packets are forced through its Tor circuit
+          by anonctl, so neither choice changes where search traffic goes.
+          Switching back is this option and a converge.
+        '';
+      };
+
+      searchcast = {
+        codeRecipes = lib.mkOption {
+          type = lib.types.listOf lib.types.path;
+          default = [];
+          description = ''
+            The code recipe files, as STORE paths, for `backend = "searchcast"`
+            (webveil's `searchcast.codeRecipes`). Code recipes are code, which is
+            why they come from the store and the account's GLOBAL webveil config
+            (webveil refuses them from a project file). Naming any replaces
+            webveil's default engine chain, so to keep its bundled Mwmbl or
+            Marginalia engine, list that recipe file too. Empty: webveil's
+            default chain.
+          '';
+        };
+
+        engines = lib.mkOption {
+          type = lib.types.listOf lib.types.str;
+          default = [];
+          description = ''
+            The engine chain, recipe names tried in order (webveil's
+            `searchcast.engines`). Empty: webveil's own order.
+          '';
+        };
       };
 
       searchSocketPaths = lib.mkOption {
