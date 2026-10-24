@@ -89,6 +89,22 @@
 # the exact reason and the fix, and reconcile still exits non-zero at the end so
 # it shows up in `systemctl --failed` rather than scrolling past.
 #
+# ONE CASE IS PENDING, NOT REFUSED (ADR-0019, amended 2026-10-24): an account
+# anonctl has NEVER proven (`no-marker`) and that has NEVER had an interface (no
+# state.json). Nothing is withheld from anyone there and nothing has lapsed: it
+# is an account on its way in. `anonctl add` writes the ledger record BEFORE its
+# inline verify writes the marker, so every add triggers a run that sees exactly
+# this, and an add whose verify cannot pass yet (a first boot with no network,
+# Tor still bootstrapping) keeps it there until verify passes. Failing the unit
+# for that made a fresh machine "degraded" with a failed unit, for seconds on a
+# networked boot and for as long as it stayed offline, for a state that is
+# normal and heals itself (the marker directory is watched). The gate is exactly
+# as strict: a pending account gets NO interface. Only the exit status differs,
+# and the message still names the account, the reason and the fix, so it is
+# not a silent skip. `anonctl add` reports its own verify failure to whoever
+# ran it. Every other refusal, and `no-marker` for an account that HAD an
+# interface (its marker went away), still exits 3.
+#
 # A refusal SUSPENDS rather than destroys: the routing fragment is retracted and
 # the instance stopped (the interface must not stay reachable once the jail stops
 # being provable), but the state file is KEPT, so a slot whose forcing lapses and
@@ -173,7 +189,9 @@ is fixture-testable without root):
   -h, --help           this text
 
 Exit status: 0 reconciled, 2 usage/setup error, 3 reconciled but at least one
-managed account was REFUSED (not proven forced).
+managed account was REFUSED (not proven forced). An account that was never
+proven and never had an interface is PENDING, not refused: it gets no
+interface, is reported, and does not make the exit status non-zero.
 EOF
 }
 
@@ -776,6 +794,11 @@ reconcile_pass() {
     if probe_forced "$account"; then
       provision "$account"
       keep="$keep$(state_field "$account" handle)"$'\n'
+    elif [ "$PROBE_CODE" = no-marker ] && [ ! -e "$STATE_DIR/$account/state.json" ]; then
+      # PENDING (see the header): never proven, never provisioned. No interface,
+      # nothing to retract, and not a failure of this run.
+      warn "PENDING $account: anonctl manages it but has not proven it anonymized YET, and it has never had an interface, so none is provisioned. Not a failure: it gets one by itself once \`anonctl verify $account\` passes (the marker directory is watched)."
+      warn "  reason: $PROBE_REASON"
     else
       REFUSED=1
       suspend "$account"
