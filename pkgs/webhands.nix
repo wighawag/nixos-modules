@@ -8,7 +8,7 @@
 # `chromium` instead: built from source, BSD-3-Clause, no Widevine.
 #
 # THE VERSION DOES NOT MATCH, AND THAT WAS MEASURED RATHER THAN ASSUMED:
-# webhands 0.8.0 bundles Playwright 1.61.1, which asks for Chromium revision
+# webhands 0.9.0 (like 0.8.0) bundles Playwright 1.61.1, which asks for Chromium revision
 # 1228 (149), and nixpkgs ships a newer Chromium (152 at the time of writing).
 # Driven headless on 2026-09-26 it launched, navigated, returned an
 # accessibility snapshot and ran page JavaScript. Playwright talks to Chromium
@@ -21,7 +21,7 @@
 # bump that moves Playwright moves the path with it.
 {
   pkgs,
-  version ? "0.8.0",
+  version ? "0.9.0",
   chromium ? pkgs.chromium,
 }:
 pkgs.buildNpmPackage (finalAttrs: {
@@ -30,14 +30,14 @@ pkgs.buildNpmPackage (finalAttrs: {
 
   src = pkgs.fetchurl {
     url = "https://registry.npmjs.org/webhands/-/webhands-${version}.tgz";
-    hash = "sha256-gQKQk/Tl4nWI83OEEw73UOd65ty2+HfFQW7O0H69oSo=";
+    hash = "sha256-HqhdoYvuI5GQ5KAo2H1vlsljfvaSxKoObVry+MkrjJg=";
   };
 
   # The published tarball ships no lockfile; this one was generated for it.
   postPatch = ''
     cp ${./webhands-package-lock.json} package-lock.json
   '';
-  npmDepsHash = "sha256-ipSn2tN1EPVPavBJgbFLJRGpknHGtij7d8aN/84XJZ0=";
+  npmDepsHash = "sha256-JdRxjNwleNQ4NU22J0RcdkeD/EF4EsGzZnsO+XXKPHo=";
   npmFlags = [ "--ignore-scripts" ];
   PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD = "1";
   dontNpmBuild = true;

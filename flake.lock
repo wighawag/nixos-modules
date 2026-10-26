@@ -25,17 +25,17 @@
     "wherever": {
       "flake": false,
       "locked": {
-        "lastModified": 1792849555,
-        "narHash": "sha256-JExc2kZ+5G2OON7bBP/rtjVosryG1ePhX07avErATkw=",
+        "lastModified": 1792917879,
+        "narHash": "sha256-LiLp2WMWbqEl9StcDYvf68euSkX1tUYVW3eQe5STUXM=",
         "owner": "wighawag",
         "repo": "wherever",
-        "rev": "861a99bd93731e395bb18962aeede3ec12239524",
+        "rev": "43f768baa69fb5c0166be91c3c80ce88fa552df9",
         "type": "github"
       },
       "original": {
         "owner": "wighawag",
         "repo": "wherever",
-        "rev": "861a99bd93731e395bb18962aeede3ec12239524",
+        "rev": "43f768baa69fb5c0166be91c3c80ce88fa552df9",
         "type": "github"
       }
     }
