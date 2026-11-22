@@ -63,10 +63,10 @@
   pkgs,
   # Explicit, never a dist-tag: an upstream publish must not change what a
   # rebuild produces. Kept in lockstep with packages/webveil.nix's version,
-  # because pi-webveil depends on webveil EXACTLY (`"webveil": "0.16.0"` in 0.10.1, not a
+  # because pi-webveil depends on webveil EXACTLY (`"webveil": "0.17.0"` in 0.10.2, not a
   # range), so a bump on one side that is not mirrored on the other puts two
   # different webveil copies on the box.
-  version ? "0.10.1",
+  version ? "0.10.2",
 }:
 pkgs.buildNpmPackage {
   pname = "pi-webveil";
@@ -74,7 +74,7 @@ pkgs.buildNpmPackage {
 
   src = pkgs.fetchurl {
     url = "https://registry.npmjs.org/pi-webveil/-/pi-webveil-${version}.tgz";
-    hash = "sha256-zxFlCPL51SprqvYiqVoHpsFbyqnH44HMAZBgo3tC+AQ=";
+    hash = "sha256-Etl5OJQweE8FY3T+uONAUNg355L7T0Cq+yHuh7ZzzRc=";
   };
 
   # The lockfile the tarball does not ship, generated from the tarball with
@@ -85,7 +85,7 @@ pkgs.buildNpmPackage {
     cp ${./pi-webveil-package-lock.json} package-lock.json
   '';
 
-  npmDepsHash = "sha256-JEjplOSVszYhhMYbNbra2zHwVjXFXPaiUQBij+tm8cc=";
+  npmDepsHash = "sha256-RDuDlzgU4hoDQ8tqwYtfYtEEBaCqZr7nVxbp7kt65io=";
 
   npmFlags = ["--ignore-scripts"];
 

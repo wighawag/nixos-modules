@@ -67,7 +67,7 @@
   pkgs,
   # Explicit, never a dist-tag: an upstream publish must not change what a
   # rebuild produces.
-  version ? "0.2.0",
+  version ? "0.2.1",
 }:
 pkgs.buildNpmPackage {
   pname = "memonaut-pi";
@@ -75,7 +75,7 @@ pkgs.buildNpmPackage {
 
   src = pkgs.fetchurl {
     url = "https://registry.npmjs.org/memonaut-pi/-/memonaut-pi-${version}.tgz";
-    hash = "sha256-bMnf7eE23/eoDy8tNpzroTIybXDzUwrEp2ox2RYVktg=";
+    hash = "sha256-P+byNpWAMbfWfLWDKPDthn6y7oF2zouZcvMOru6A3fI=";
   };
 
   # The lockfile the tarball does not ship, generated from the tarball with
@@ -96,7 +96,7 @@ pkgs.buildNpmPackage {
     cp ${./memonaut-pi-package-lock.json} package-lock.json
   '';
 
-  npmDepsHash = "sha256-rOayEGHOnjtQeBz0e4vjFHIsnjWRRqGR/gBwj7WT5mg=";
+  npmDepsHash = "sha256-/D0Yw3vzxDgHnA51tVTAR7/d38gKANW/fEZ40nJrX4w=";
 
   npmFlags = ["--ignore-scripts" "--legacy-peer-deps"];
 
