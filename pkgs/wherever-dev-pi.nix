@@ -29,7 +29,7 @@
   pkgs,
   # Explicit, never a dist-tag: an upstream publish must not change what a
   # rebuild produces.
-  version ? "0.8.0",
+  version ? "0.9.0",
 }:
 pkgs.buildNpmPackage {
   pname = "wherever-dev-pi";
@@ -37,7 +37,7 @@ pkgs.buildNpmPackage {
 
   src = pkgs.fetchurl {
     url = "https://registry.npmjs.org/@wherever-dev/pi/-/pi-${version}.tgz";
-    hash = "sha256-npaOAjS+e+DiLxfSa5bB7CNN52tvmLBHh8sqiuawWQY=";
+    hash = "sha256-8G2ddxES/38XTvlSSBG6/dj75aBE41iERWbw4YPrcYk=";
   };
 
   # Same hook and same absolute `jq` as memonaut-pi, for the same reason (the
@@ -48,7 +48,7 @@ pkgs.buildNpmPackage {
     cp ${./wherever-dev-pi-package-lock.json} package-lock.json
   '';
 
-  npmDepsHash = "sha256-aa/Xg23YSlGdlnLb7MUc76RVVMbMB8MLLYctFX4lKrw=";
+  npmDepsHash = "sha256-GqMJSkxbm54kueyjK7TaL2lnQYsQQ1m4dZkE2pQqlYo=";
 
   npmFlags = ["--ignore-scripts" "--legacy-peer-deps"];
 
