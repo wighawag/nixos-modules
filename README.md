@@ -16,7 +16,7 @@ Used by [wabisabi](https://github.com/wighawag/wabisabi), which switches them on
 | `interactiveShell` | `nixos-modules.interactiveShell` | ble.sh, fzf, zoxide, atuin and a starship powerline prompt in /etc/bashrc, one Catppuccin palette |
 | `default` | all of the above | |
 
-The packages they run (`anonctl`, `pi`, `wherever`, `webveil`, `pi-webveil`, `memonaut`, `memonaut-pi`, `pi-subagents`, `pi-mcp-adapter`, `webhands`, `pi-wabisabi-local`, ...) are built against the importing system's pkgs and exposed as `config.nixos-modules.pkgs`; override one attribute to substitute your own build. They are also flake `packages` for building on their own.
+The packages they run (`anonctl`, `pi`, `wherever`, `webveil`, `pi-webveil`, `memonaut`, `memonaut-pi`, `pi-subagents`, `pi-mcp-adapter`, `pi-plan-mode`, `wherever-dev-pi`, `kenning-pi`, `webhands`, `pi-wabisabi-local`, ...) are built against the importing system's pkgs and exposed as `config.nixos-modules.pkgs`; override one attribute to substitute your own build. They are also flake `packages` for building on their own.
 
 ## Using it
 
