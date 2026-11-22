@@ -47,7 +47,7 @@ in
   pi-mcp-adapter = import ./pi-mcp-adapter.nix { inherit pkgs; };
   pi-plan-mode = import ./pi-plan-mode.nix { inherit pkgs; };
   wherever-dev-pi = import ./wherever-dev-pi.nix { inherit pkgs; };
-  kenning-pi = import ./kenning-pi.nix { inherit pkgs; };
+  shipmates-pi = import ./shipmates-pi.nix { inherit pkgs; };
   pi-wabisabi-local = import ./pi-wabisabi-local { inherit pkgs; };
   webhands = import ./webhands.nix { inherit pkgs; };
 }
