@@ -43,6 +43,8 @@ in
   pi-webveil = import ./pi-webveil.nix { inherit pkgs; };
   memonaut = import ./memonaut.nix { inherit pkgs; };
   memonaut-pi = import ./memonaut-pi.nix { inherit pkgs; };
+  pi-subagents = import ./pi-subagents.nix { inherit pkgs; };
+  pi-mcp-adapter = import ./pi-mcp-adapter.nix { inherit pkgs; };
   pi-wabisabi-local = import ./pi-wabisabi-local { inherit pkgs; };
   webhands = import ./webhands.nix { inherit pkgs; };
 }
