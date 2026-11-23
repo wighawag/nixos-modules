@@ -31,7 +31,7 @@
   pkgs,
   # Explicit, never a dist-tag: an upstream publish must not change what a
   # rebuild produces.
-  version ? "0.89.2",
+  version ? "0.90.0",
 }:
 pkgs.buildNpmPackage {
   pname = "pi-subagents";
@@ -39,7 +39,7 @@ pkgs.buildNpmPackage {
 
   src = pkgs.fetchurl {
     url = "https://registry.npmjs.org/pi-subagents/-/pi-subagents-${version}.tgz";
-    hash = "sha256-pyCbe29uo7Eh8S6TcKeXtkqKEv0xa7PnNfY3GPQBekE=";
+    hash = "sha256-mf/FM8IR7ZQlsLaUHnUAYVyudxCeaFUbjegz3jmjRgo=";
   };
 
   # Same hook and same absolute `jq` as memonaut-pi, for the same reason (the
@@ -50,7 +50,7 @@ pkgs.buildNpmPackage {
     cp ${./pi-subagents-package-lock.json} package-lock.json
   '';
 
-  npmDepsHash = "sha256-eRBPyq0cehWZY9a4gWgBT2vTgcOOrXMVdtzd0WD5iNM=";
+  npmDepsHash = "sha256-n7Bcd+IwYcp/3q0I3F8pWQmfYEn5LDBhMw9mzR1CsGM=";
 
   npmFlags = ["--ignore-scripts" "--legacy-peer-deps"];
 
