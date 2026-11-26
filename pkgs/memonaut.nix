@@ -29,7 +29,7 @@
 {
   pkgs,
   # Explicit, never a dist-tag.
-  version ? "0.4.0",
+  version ? "0.5.0",
 }:
 pkgs.stdenv.mkDerivation {
   pname = "memonaut";
@@ -37,7 +37,7 @@ pkgs.stdenv.mkDerivation {
 
   src = pkgs.fetchurl {
     url = "https://registry.npmjs.org/memonaut/-/memonaut-${version}.tgz";
-    hash = "sha256-0VLk0hHjxhuXwV1X3dKwZ5h3YH7MDfjostbsRggaoW0=";
+    hash = "sha256-mnIv3+YM3RCZ3m8g+to3T2LcqwayXWuwYhVE+gNjchU=";
   };
 
   nativeBuildInputs = [pkgs.makeWrapper];

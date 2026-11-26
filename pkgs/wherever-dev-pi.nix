@@ -24,12 +24,12 @@
 #        npm install --package-lock-only --ignore-scripts --legacy-peer-deps
 #        cp package-lock.json <this dir>/wherever-dev-pi-package-lock.json
 #   2. nix store prefetch-file --name pi-<v>.tgz <tarball url>, paste into src.hash
-#   3. set npmDepsHash = pkgs.lib.fakeHash, build, paste the `got:` hash back
+#   3. set npmDepsHash = "sha256-hYrl03maEZPGVf21h3jIuNxNqaAOMoZfPf5YA4+0zKk=", build, paste the `got:` hash back
 {
   pkgs,
   # Explicit, never a dist-tag: an upstream publish must not change what a
   # rebuild produces.
-  version ? "0.9.1",
+  version ? "0.9.2",
 }:
 pkgs.buildNpmPackage {
   pname = "wherever-dev-pi";
@@ -37,7 +37,7 @@ pkgs.buildNpmPackage {
 
   src = pkgs.fetchurl {
     url = "https://registry.npmjs.org/@wherever-dev/pi/-/pi-${version}.tgz";
-    hash = "sha256-Ur7Mh6L5vik3uAWce/jB6QYKxxjHW7xx85J60n18tJE=";
+    hash = "sha256-gjjn93h7xfskhP3Q4lTCbNx9Aasqw6a4baDWj9mXI1s=";
   };
 
   # Same hook and same absolute `jq` as memonaut-pi, for the same reason (the
@@ -48,7 +48,7 @@ pkgs.buildNpmPackage {
     cp ${./wherever-dev-pi-package-lock.json} package-lock.json
   '';
 
-  npmDepsHash = "sha256-dHhV/+DzBADc76cp7Omf7XpJDo8RQryVbifNbSdrtzM=";
+  npmDepsHash = "sha256-hYrl03maEZPGVf21h3jIuNxNqaAOMoZfPf5YA4+0zKk=";
 
   npmFlags = ["--ignore-scripts" "--legacy-peer-deps"];
 

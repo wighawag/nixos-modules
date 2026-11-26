@@ -62,12 +62,12 @@
 #        npm install --package-lock-only --ignore-scripts --legacy-peer-deps
 #        cp package-lock.json <this dir>/memonaut-pi-package-lock.json
 #   2. nix store prefetch-file --name memonaut-pi-<v>.tgz <tarball url>, paste into src.hash
-#   3. set npmDepsHash = pkgs.lib.fakeHash, build, paste the `got:` hash back
+#   3. set npmDepsHash = "sha256-d5SzL7E+Ts72tQwc6Z4wLUtZvk0QGRQYpSGy/bbFqFU=", build, paste the `got:` hash back
 {
   pkgs,
   # Explicit, never a dist-tag: an upstream publish must not change what a
   # rebuild produces.
-  version ? "0.2.1",
+  version ? "0.3.0",
 }:
 pkgs.buildNpmPackage {
   pname = "memonaut-pi";
@@ -75,7 +75,7 @@ pkgs.buildNpmPackage {
 
   src = pkgs.fetchurl {
     url = "https://registry.npmjs.org/memonaut-pi/-/memonaut-pi-${version}.tgz";
-    hash = "sha256-P+byNpWAMbfWfLWDKPDthn6y7oF2zouZcvMOru6A3fI=";
+    hash = "sha256-yyTDF38K2hyAIIzv1n+jfnuMtzSYFQD9LmSuekqfkgU=";
   };
 
   # The lockfile the tarball does not ship, generated from the tarball with
@@ -96,7 +96,7 @@ pkgs.buildNpmPackage {
     cp ${./memonaut-pi-package-lock.json} package-lock.json
   '';
 
-  npmDepsHash = "sha256-/D0Yw3vzxDgHnA51tVTAR7/d38gKANW/fEZ40nJrX4w=";
+  npmDepsHash = "sha256-d5SzL7E+Ts72tQwc6Z4wLUtZvk0QGRQYpSGy/bbFqFU=";
 
   npmFlags = ["--ignore-scripts" "--legacy-peer-deps"];
 
