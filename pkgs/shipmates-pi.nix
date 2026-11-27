@@ -39,7 +39,7 @@
   pkgs,
   # Explicit, never a dist-tag: an upstream publish must not change what a
   # rebuild produces.
-  version ? "0.4.0",
+  version ? "0.5.0",
 }:
 pkgs.buildNpmPackage {
   pname = "shipmates-pi";
@@ -47,7 +47,7 @@ pkgs.buildNpmPackage {
 
   src = pkgs.fetchurl {
     url = "https://registry.npmjs.org/@shipmates/pi/-/pi-${version}.tgz";
-    hash = "sha256-r7XNPdIF18Qj89g9CCMxjQVkDzPPygc3SV0wtYCD6Jw=";
+    hash = "sha256-NkKPNzPjC07vPZF3jtCCmW6ji6MDZkj+I0BxaBGvByA=";
   };
 
   # Same hook and same absolute `jq` as memonaut-pi, for the same reason (the
@@ -58,7 +58,7 @@ pkgs.buildNpmPackage {
     cp ${./shipmates-pi-package-lock.json} package-lock.json
   '';
 
-  npmDepsHash = "sha256-PjgOMB4MVV25EYlYVb4sjYSlK29AAW34XvDTGU+5grE=";
+  npmDepsHash = "sha256-HbFniLQDw0qpmtHGw5XnNwPjbz9wnoVPDxgsRQwOp1g=";
 
   npmFlags = ["--ignore-scripts" "--legacy-peer-deps"];
 
